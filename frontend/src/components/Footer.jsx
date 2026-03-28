@@ -7,18 +7,18 @@ const Footer = () => {
     <footer className="bg-brand-black text-gray-400 py-16 px-6 md:px-12 xl:px-20">
       <div className="max-w-[1440px] mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 border-b border-white/10 pb-12">
-          
+
           <div className="lg:col-span-1">
             <div className="font-dealer-name text-2xl tracking-wide flex items-baseline mb-4">
               <span className="text-brand-red font-bold uppercase">Mitsubishi</span>
               <span className="text-white font-medium uppercase ml-1">Utama</span>
             </div>
             <p className="text-sm text-gray-400 mb-6">Dealer resmi Mitsubishi Motors melayani penjualan kendaraan penumpang dan niaga dengan layanan prima.</p>
-            
+
             <div className="space-y-3 text-sm text-gray-400">
               <div className="flex items-start space-x-3">
                 <MapPin className="w-5 h-5 text-brand-red flex-shrink-0" />
-                <span>Jl. Raya Jakarta No. 123, Jakarta Selatan, 12345</span>
+                <span>Jl. MH. Thamrin No.88, RT.005/RW.001, Cikokol, Kec. Tangerang, Kota Tangerang, Banten 15117</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Mail className="w-5 h-5 text-brand-red" />
@@ -26,7 +26,7 @@ const Footer = () => {
               </div>
             </div>
           </div>
-          
+
           <div>
             <h3 className="text-white text-lg font-bold mb-5 tracking-tight">Tautan Cepat</h3>
             <ul className="space-y-3 text-sm">
@@ -37,7 +37,7 @@ const Footer = () => {
               <li><Link to="/news" className="hover:text-white transition">Berita Dealer</Link></li>
             </ul>
           </div>
-          
+
           <div>
             <h3 className="text-white text-lg font-bold mb-5 tracking-tight">Produk Utama</h3>
             <ul className="space-y-3 text-sm">
@@ -48,21 +48,38 @@ const Footer = () => {
               <li><Link to="/detail/10" className="hover:text-white transition">Canter Truck</Link></li>
             </ul>
           </div>
-          
+
           <div>
             <h3 className="text-white text-lg font-bold mb-5 tracking-tight">Jam Operasional</h3>
             <div className="space-y-3 text-sm text-gray-400">
               <p>Senin - Jumat: 08.00 - 17.00</p>
               <p>Sabtu: 08.00 - 14.00</p>
               <p>Minggu: Tutup (Hanya Layanan Sales)</p>
-              <a href="https://wa.me/6281212345678" className="inline-block mt-4 text-xs font-bold uppercase tracking-widest text-brand-red">Hubungi Sales 24/7</a>
+              <a href="https://wa.me/6281212345678" className="inline-block mt-4 text-xs font-bold uppercase tracking-widest text-brand-red hover:text-white transition-colors">Hubungi Sales 24/7</a>
             </div>
           </div>
         </div>
-        
-        <div className="text-center mt-12 text-sm text-gray-600">
-          &copy; {new Date().getFullYear()} Mitsubishi Utama by Srikandi. All rights reserved. Website by Srikandi Cikokol.
+
+        <div className="flex flex-col md:flex-row justify-between items-center mt-8 text-sm text-gray-500 pt-4 gap-4">
+          <p className="text-center md:text-left">
+            &copy; {new Date().getFullYear()} Mitsubishi Utama by Srikandi. All rights reserved. Website by Srikandi Cikokol.
+          </p>
+
+          <div className="flex flex-wrap justify-center md:justify-end items-center gap-x-6 gap-y-2">
+            <Link to="#" className="hover:text-white transition-colors uppercase tracking-widest text-[11px] font-bold">
+              Site Map / Peta Situs
+            </Link>
+            <span className="hidden md:inline-block text-gray-700">|</span>
+            <Link to="#" className="hover:text-white transition-colors uppercase tracking-widest text-[11px] font-bold">
+              Kebijakan Privasi
+            </Link>
+            <span className="hidden md:inline-block text-gray-700">|</span>
+            <Link to="#" className="hover:text-white transition-colors uppercase tracking-widest text-[11px] font-bold">
+              Syarat & Ketentuan
+            </Link>
+          </div>
         </div>
+
       </div>
     </footer>
   );

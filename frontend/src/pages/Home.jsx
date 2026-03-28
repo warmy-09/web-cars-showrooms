@@ -1,7 +1,6 @@
-// src/pages/Home.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, CheckCircle, ShieldCheck, MapPin, Phone, Clock, Calendar, Quote, Car } from 'lucide-react'; 
+import { ArrowRight, Star, CheckCircle, ShieldCheck, MapPin, Phone, Clock, Calendar, Quote, Car } from 'lucide-react';
 import { heroSlidesData, carsData } from '../data/mockData';
 
 const CarCard = ({ car }) => {
@@ -16,7 +15,7 @@ const CarCard = ({ car }) => {
         </div>
         <span className="absolute top-4 right-4 bg-gray-200/60 text-gray-600 text-[10px] font-extrabold px-2.5 py-1 rounded-md z-10 tracking-widest">{car.year}</span>
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"><div className="w-40 h-40 bg-white rounded-full blur-2xl"></div></div>
-        
+
         {imageError ? (
           <div className="w-full max-w-lg flex flex-col items-center justify-center text-gray-300 opacity-60 relative z-0">
             <Car className="w-24 h-24 mb-3 text-gray-200" strokeWidth={1} />
@@ -30,7 +29,7 @@ const CarCard = ({ car }) => {
       <div className="p-6 flex-grow flex flex-col bg-white">
         <h3 className="text-2xl font-extrabold text-brand-black mb-1 tracking-tight uppercase line-clamp-1" title={car.name}>{car.name}</h3>
         <p className="text-xs text-gray-500 mb-5 pb-5 border-b border-gray-100">Mulai Dari <span className="font-extrabold text-lg text-brand-red ml-1">{car.priceString}</span></p>
-        
+
         <div className="space-y-2.5 mb-6 flex-grow">
           {car.quickSpecs && car.quickSpecs.slice(0, 3).map((spec, idx) => (
             <div key={idx} className="flex items-center text-xs text-gray-600">
@@ -39,7 +38,7 @@ const CarCard = ({ car }) => {
             </div>
           ))}
         </div>
-        
+
         <div className="mt-auto grid grid-cols-2 gap-3 pt-2">
           <Link to={`/detail/${car.slug}`} className="w-full text-center bg-white border-2 border-gray-200 text-brand-black py-2.5 rounded-xl text-sm font-extrabold hover:border-brand-black transition duration-300">Lihat Detail</Link>
           <button className="w-full bg-brand-black text-white py-2.5 rounded-xl text-sm font-extrabold hover:bg-brand-red transition duration-300 flex items-center justify-center group/btn">Brosur <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" /></button>
@@ -68,7 +67,7 @@ const Home = () => {
   ];
 
   useEffect(() => {
-    if (heroSlides.length === 0) return; 
+    if (heroSlides.length === 0) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev === heroSlides.length - 1 ? 0 : prev + 1));
     }, 5000);
@@ -77,8 +76,7 @@ const Home = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen font-sans">
-      
-      {/* 1. HERO SECTION */}
+
       <section className="relative min-h-[750px] md:h-[650px] w-full overflow-hidden flex flex-col justify-between bg-slate-950 [background:radial-gradient(circle_at_75%_50%,_#475569_0%,_#0f172a_45%,_#020617_100%)]">
         <div className="relative flex-1 max-w-[1440px] mx-auto w-full flex items-center">
           {heroSlides.length > 0 ? (
@@ -90,7 +88,7 @@ const Home = () => {
                   <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white mb-3 tracking-tight leading-tight md:leading-none">{slide.title}</h1>
                   <p className="text-xl font-bold text-white mb-6">Mulai Harga <span className="text-brand-red">{slide.price}</span></p>
                   <p className="text-white/80 text-base md:text-lg mb-8 max-w-md mx-auto md:mx-0">{slide.desc}</p>
-                  
+
                   <div className="flex flex-wrap gap-4 justify-center md:justify-start">
                     <Link to={`/detail/${slide.slug}`} className="flex items-center bg-brand-red text-white px-6 py-3 rounded-md font-medium hover:bg-red-700 transition shadow-lg text-sm uppercase tracking-wider">
                       Dapatkan Penawaran <ArrowRight className="ml-2 w-4 h-4" />
@@ -116,7 +114,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 2. MENGAPA MEMILIH KAMI */}
       <section className="py-16 px-6 md:px-12 xl:px-20 bg-white border-b border-gray-100">
         <div className="max-w-[1440px] mx-auto">
           <div className="text-center mb-10">
@@ -132,7 +129,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 3. UNIT TERPOPULER */}
       <section className="py-20 px-6 md:px-12 xl:px-20 bg-gray-50">
         <div className="max-w-[1440px] mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-end mb-12">
@@ -145,7 +141,7 @@ const Home = () => {
               Lihat Semua Model <ArrowRight className="ml-2 w-4 h-4" />
             </Link>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {popularCars.length > 0 ? (
               popularCars.map((car) => (
@@ -158,7 +154,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 4. BERITA & PROMO */}
       <section className="py-20 px-6 md:px-12 xl:px-20 bg-white border-t border-gray-100">
         <div className="max-w-[1440px] mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-end mb-12">
@@ -188,7 +183,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 5. TESTIMONI PELANGGAN */}
       <section className="py-20 px-6 md:px-12 xl:px-20 bg-brand-black text-white">
         <div className="max-w-[1440px] mx-auto">
           <div className="text-center mb-16">
@@ -215,14 +209,13 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 6. SEKSI LOKASI & MAPS */}
       <section className="py-20 px-6 md:px-12 xl:px-20 bg-white border-t border-gray-200">
         <div className="max-w-[1440px] mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl font-extrabold text-brand-black mb-6">Kunjungi Showroom Kami</h2>
               <p className="text-gray-500 mb-8 leading-relaxed">Datang dan rasakan langsung pengalaman berkendara terbaik bersama Mitsubishi. Tim sales profesional kami siap membantu Anda memilih kendaraan yang paling sesuai dengan kebutuhan Anda.</p>
-              
+
               <div className="space-y-6">
                 <div className="flex items-start">
                   <div className="w-12 h-12 bg-red-50 text-brand-red rounded-full flex items-center justify-center mr-4 flex-shrink-0"><MapPin className="w-5 h-5" /></div>

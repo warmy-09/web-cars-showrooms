@@ -3,12 +3,11 @@ import { useParams, Link } from 'react-router-dom';
 import { ChevronRight, Download, CheckCircle, ShieldCheck, Settings, Calculator, Star, ChevronDown, Image as ImageIcon, Share2, Car } from 'lucide-react';
 import PenawaranModal from '../components/PenawaranModal';
 
-// FIX: Import carsData dari mockData
 import { carsData } from '../data/mockData';
 
 const ProductDetail = () => {
   const { slug } = useParams();
-  
+
   const [car, setCar] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -19,22 +18,21 @@ const ProductDetail = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [dpPercent, setDpPercent] = useState(20);
-  const [tenor, setTenor] = useState(5); 
+  const [tenor, setTenor] = useState(5);
   const [asuransi, setAsuransi] = useState('Allrisk');
   const [selectedVariant, setSelectedVariant] = useState(null);
 
   useEffect(() => {
-    window.scrollTo(0, 0); 
+    window.scrollTo(0, 0);
     setImageError(false);
-    
+
     const fetchProductData = async () => {
       setIsLoading(true);
       try {
         await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // FIX: Panggil data dari carsData
-        const data = carsData[slug]; 
-        
+
+        const data = carsData[slug];
+
         if (data) {
           setCar(data);
           setSelectedVariant(data.variants[0]);
@@ -57,7 +55,7 @@ const ProductDetail = () => {
   const formatRp = (number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number);
 
   const handleScrollToCalculator = (variant) => {
-    setSelectedVariant(variant); 
+    setSelectedVariant(variant);
     const calculatorSection = document.getElementById('kalkulator-kredit');
     if (calculatorSection) {
       calculatorSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -79,7 +77,6 @@ const ProductDetail = () => {
             console.error('Batal membagikan:', err);
         }
         } else {
-        // Fallback: Jika browser/OS tidak support, kembali ke copy link biasa
         navigator.clipboard.writeText(window.location.href);
         alert('Link halaman berhasil disalin! Silakan paste di WhatsApp atau Sosmed Anda.');
         }
@@ -98,8 +95,7 @@ const ProductDetail = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen font-sans text-brand-black pb-20">
-      
-      {/* 1. HERO SECTION */}
+
       <section className="bg-white border-b border-gray-200 pt-8 pb-16 px-6 md:px-12 xl:px-20">
         <div className="max-w-[1440px] mx-auto">
           <div className="flex items-center text-xs text-gray-500 mb-8">
@@ -112,25 +108,24 @@ const ProductDetail = () => {
             <div className="bg-gray-50 rounded-2xl p-8 flex items-center justify-center border border-gray-100 relative group min-h-[350px] lg:min-h-[450px]">
           <span className="absolute top-6 left-6 bg-white border border-gray-200 text-xs font-bold px-3 py-1 rounded-full text-gray-600 shadow-sm uppercase tracking-wider z-10">{car.category}</span>
 
-          {/* LOGIKA MODERN FALLBACK */}
           {imageError ? (
             <div className="w-full max-w-lg flex flex-col items-center justify-center text-gray-400 opacity-60">
               <Car className="w-24 h-24 mb-4 text-gray-300" strokeWidth={1.5} />
               <span className="text-sm font-bold tracking-widest uppercase">Visual Belum Tersedia</span>
             </div>
           ) : (
-            <img 
-              src={car.image} 
-              alt={car.name} 
-              className="w-full max-w-lg object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-500 relative z-0" 
-              onError={() => setImageError(true)} 
+            <img
+              src={car.image}
+              alt={car.name}
+              className="w-full max-w-lg object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-500 relative z-0"
+              onError={() => setImageError(true)}
             />
           )}
         </div>
 
             <div>
               <p className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-2">Model Year 2026</p>
-              
+
               <div className="flex justify-between items-start mb-4">
                 <h1 className="text-4xl md:text-5xl font-extrabold text-brand-black tracking-tight">{car.name}</h1>
                 <button onClick={handleShare} className="p-2 bg-gray-50 border border-gray-200 rounded-full text-gray-500 hover:text-brand-black transition" title="Share Halaman Ini">
@@ -139,7 +134,7 @@ const ProductDetail = () => {
               </div>
 
               <p className="text-gray-500 mb-8 leading-relaxed">{car.tagline}</p>
-              
+
               <div className="mb-8">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Harga OTR Jakarta Mulai</p>
                 <div className="flex items-end gap-3">
@@ -163,7 +158,6 @@ const ProductDetail = () => {
         </div>
       </section>
 
-      {/* 2. KOMITMEN DEALER */}
       <section className="py-16 px-6 md:px-12 xl:px-20 max-w-[1440px] mx-auto border-y border-gray-100 mt-10">
         <div className="text-center mb-10">
           <h2 className="text-3xl font-extrabold text-brand-black">Komitmen <span className="text-brand-red">Mitsubishi Utama</span></h2>
@@ -188,7 +182,6 @@ const ProductDetail = () => {
         </div>
       </section>
 
-      {/* 3. TIGA TABS */}
       <section className="px-6 md:px-12 xl:px-20 max-w-[1440px] mx-auto mb-20 mt-10">
         <div className="border-b border-gray-200 flex space-x-8 mb-8 overflow-x-auto">
           <button onClick={() => setActiveTab('harga')} className={`pb-4 text-sm font-bold tracking-widest uppercase transition-colors whitespace-nowrap ${activeTab === 'harga' ? 'text-brand-black border-b-2 border-brand-black' : 'text-gray-400 hover:text-gray-700'}`}>Harga & Varian</button>
@@ -256,7 +249,6 @@ const ProductDetail = () => {
         )}
       </section>
 
-      {/* 4. SMART CREDIT SIMULATOR */}
       <section id="kalkulator-kredit" className="px-6 md:px-12 xl:px-20 max-w-[1440px] mx-auto mb-20 scroll-mt-24">
         <div className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 md:p-10">
           <div className="flex items-center mb-8 border-b border-gray-100 pb-6">
@@ -326,11 +318,10 @@ const ProductDetail = () => {
         </div>
       </section>
 
-      {/* 5. GALERI FOTO */}
       <section className="px-6 md:px-12 xl:px-20 max-w-[1440px] mx-auto mb-20">
         <h2 className="text-3xl font-extrabold text-brand-black text-center mb-2 flex items-center justify-center"><ImageIcon className="mr-3 w-8 h-8 text-gray-400" /> Galeri {car.name}</h2>
         <p className="text-center text-gray-500 mb-8">Lihat {car.name} dari berbagai sudut eksterior dan interior.</p>
-        
+
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {car.gallery.map((img, idx) => (
             <div key={idx} className={`rounded-2xl overflow-hidden bg-gray-200 border border-gray-100 relative group cursor-pointer ${idx === 0 ? 'col-span-2 row-span-2 md:h-96' : 'h-48'}`}>
@@ -346,7 +337,6 @@ const ProductDetail = () => {
         </div>
       </section>
 
-      {/* 6. PROMO & ULASAN */}
       <section className="px-6 md:px-12 xl:px-20 max-w-[1440px] mx-auto mb-20 grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 bg-gray-50 border border-gray-200 rounded-3xl p-8 flex flex-col justify-center">
           <h3 className="text-xl font-extrabold text-brand-black mb-3">Promo {car.name} Bulan Ini</h3>
@@ -393,7 +383,6 @@ const ProductDetail = () => {
         </div>
       </section>
 
-      {/* 7. FAQ SPESIFIK PRODUK */}
       <section className="px-6 md:px-12 xl:px-20 max-w-[1024px] mx-auto mb-20">
         <h2 className="text-2xl font-extrabold text-brand-black mb-8 text-center">Pertanyaan Umum tentang {car.name}</h2>
         <div className="space-y-3">
@@ -411,9 +400,9 @@ const ProductDetail = () => {
         </div>
       </section>
 
-      <PenawaranModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <PenawaranModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         selectedModel={car.name}
         selectedVarian="Belum Menentukan (Konsultasi via WA)"
       />
