@@ -1,0 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --color-brand-red: #DC2626;
+  --color-brand-black: #111827;
+  /* Kita definisikan variabel font-family khusus untuk nama dealer */
+  --font-family-dealer-name: 'Outfit', sans-serif;
+}
