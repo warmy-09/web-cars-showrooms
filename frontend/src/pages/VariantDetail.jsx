@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronLeft, CheckCircle, ShieldCheck, Calculator, Star, Share2, Car } from 'lucide-react';
 
-// FIX: Import carsData dari mockData
-import { carsData } from '../data/mockData'; 
+import { carsData } from '../data/mockData';
 
 const VariantDetail = () => {
   const { slug, variantSlug } = useParams();
@@ -19,11 +18,10 @@ const VariantDetail = () => {
   const [asuransi, setAsuransi] = useState('Allrisk');
 
   useEffect(() => {
-    window.scrollTo(0, 0); 
+    window.scrollTo(0, 0);
     setIsLoading(true);
     setImageError(false);
-    
-    // FIX: Panggil data dari carsData
+
     const carData = carsData[slug];
     if (carData) {
       const variantData = carData.variants.find(v => v.slug === variantSlug);
@@ -32,22 +30,21 @@ const VariantDetail = () => {
         setVariant(variantData);
       }
     }
-    
+
     setTimeout(() => { setIsLoading(false); }, 500);
   }, [slug, variantSlug]);
 
-  const bungaPerTahun = 0.048; 
+  const bungaPerTahun = 0.048;
   const variantPrice = variant ? variant.price : 0;
   const dpNominal = variantPrice * (dpPercent / 100);
   const pokokHutang = variantPrice - dpNominal;
   const totalBunga = pokokHutang * bungaPerTahun * tenor;
   const totalHutang = pokokHutang + totalBunga;
   const angsuranPerBulan = totalHutang / (tenor * 12);
-  const tdp = dpNominal + angsuranPerBulan; 
+  const tdp = dpNominal + angsuranPerBulan;
 
   const formatRp = (number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number);
 
-// Fungsi Share dengan Web Share API (Native OS) khusus Varian
   const handleShare = async () => {
     const shareData = {
       title: `${car?.name} ${variant?.name} - Mitsubishi Utama`,
@@ -63,7 +60,6 @@ const VariantDetail = () => {
         console.error('Batal membagikan:', err);
       }
     } else {
-      // Fallback: Jika browser/OS tidak support, kembali ke copy link biasa
       navigator.clipboard.writeText(window.location.href);
       alert('Link Varian berhasil disalin! Silakan paste di WhatsApp atau Sosmed Anda.');
     }
@@ -74,7 +70,7 @@ const VariantDetail = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen font-sans text-brand-black pb-20">
-      
+
       <div className="bg-white px-6 md:px-12 xl:px-20 border-b border-gray-100">
         <div className="max-w-[1440px] mx-auto py-4">
           <Link to={`/detail/${car.slug}`} className="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-brand-red transition">
@@ -85,24 +81,23 @@ const VariantDetail = () => {
 
       <section className="px-6 md:px-12 xl:px-20 max-w-[1440px] mx-auto py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-stretch">
-          
+
           <div className="lg:col-span-7 flex flex-col gap-8">
             <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm relative flex items-center justify-center min-h-[400px]">
           <span className="absolute top-6 left-6 bg-gray-100 text-xs font-bold px-3 py-1.5 rounded-full text-gray-600 tracking-widest flex items-center z-10">
             <span className="w-2 h-2 rounded-full bg-brand-red mr-2"></span> 360° STUDIO
           </span>
 
-          {/* LOGIKA MODERN FALLBACK */}
           {imageError ? (
             <div className="w-full max-w-lg flex flex-col items-center justify-center text-gray-300">
               <Car className="w-32 h-32 mb-4 text-gray-200" strokeWidth={1} />
               <span className="text-sm font-bold tracking-widest uppercase text-gray-400">Visual Varian Belum Tersedia</span>
             </div>
           ) : (
-            <img 
-              src={car.image} 
-              alt={variant.name} 
-              className="w-full max-w-lg object-contain drop-shadow-2xl relative z-0" 
+            <img
+              src={car.image}
+              alt={variant.name}
+              className="w-full max-w-lg object-contain drop-shadow-2xl relative z-0"
               onError={() => setImageError(true)}
             />
           )}
@@ -113,7 +108,7 @@ const VariantDetail = () => {
                 <h4 className="font-extrabold text-lg mb-4">Pilihan Warna</h4>
                 <div className="flex space-x-3">
                   {car.colors.map((color, idx) => (
-                    <button 
+                    <button
                       key={idx}
                       onClick={() => setSelectedColor(color.name)}
                       className={`w-10 h-10 rounded-full border-2 transition-all duration-300 ${selectedColor === color.name ? 'border-brand-black scale-110 shadow-md ring-2 ring-gray-200 ring-offset-2' : 'border-gray-300'}`}
@@ -141,7 +136,7 @@ const VariantDetail = () => {
 
           <div className="lg:col-span-5 flex flex-col h-full bg-white rounded-3xl border border-gray-100 shadow-sm p-6 lg:p-8">
             <div className="flex-1 overflow-y-auto pr-4 pb-4 max-h-[600px] lg:max-h-[650px] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-gray-50 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full">
-              
+
               <div className="mb-8">
                 <div className="flex justify-between items-start mb-2">
                   <h1 className="text-3xl font-extrabold text-brand-black leading-tight">
@@ -151,7 +146,7 @@ const VariantDetail = () => {
                     <Share2 className="w-5 h-5"/>
                   </button>
                 </div>
-                
+
                 <div className="flex items-center space-x-2 text-sm text-gray-600 mb-6">
                   <div className="flex text-amber-400">
                     {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-amber-400" />)}
@@ -205,9 +200,9 @@ const VariantDetail = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="mt-6 pt-6 border-t border-gray-100 bg-white">
-              <button 
+              <button
                 onClick={() => document.getElementById('kalkulator-kredit-varian').scrollIntoView({ behavior: 'smooth' })}
                 className="w-full bg-brand-black text-white py-4 rounded-xl font-bold text-lg hover:bg-gray-800 transition shadow-md"
               >
@@ -215,12 +210,11 @@ const VariantDetail = () => {
               </button>
               <p className="text-[10px] text-gray-400 text-center mt-3">*Harga dapat berubah sewaktu-waktu. Hubungi kami untuk simulasi kredit yang akurat.</p>
             </div>
-            
+
           </div>
         </div>
       </section>
 
-      {/* KOMITMEN DEALER */}
       <section className="py-16 px-6 md:px-12 xl:px-20 bg-white border-y border-gray-200 mt-10">
         <div className="max-w-[1440px] mx-auto text-center">
           <h2 className="text-3xl font-extrabold text-brand-black mb-3">Komitmen <span className="text-brand-red">Mitsubishi Utama</span></h2>
@@ -233,7 +227,6 @@ const VariantDetail = () => {
         </div>
       </section>
 
-      {/* SMART CREDIT SIMULATOR */}
       <section id="kalkulator-kredit-varian" className="px-6 md:px-12 xl:px-20 py-20 max-w-[1440px] mx-auto scroll-mt-10">
         <div className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 md:p-10">
           <div className="flex items-center mb-8 border-b border-gray-100 pb-6">
