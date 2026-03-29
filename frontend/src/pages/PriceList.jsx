@@ -1,9 +1,78 @@
 // frontend/src/pages/PriceList.jsx
 import React, { useState, useEffect } from 'react';
 import { Filter, ChevronRight, Download } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import PenawaranModal from '../components/PenawaranModal';
 import { Link } from 'react-router-dom';
 import { carsData as mockCarsData } from '../data/mockData';
+
+const formatToIdr = (value) => {
+  if (value === null || value === undefined || value === '') return null;
+
+  const numericValue = Number(value);
+  if (Number.isNaN(numericValue)) return null;
+
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    maximumFractionDigits: 0
+  }).format(numericValue);
+};
+
+const normalizeCarsData = (cars = []) => {
+  return cars.map(car => {
+    let carSpecs = car.specs || {};
+    if (typeof carSpecs === 'string') {
+      try { carSpecs = JSON.parse(carSpecs); } catch { carSpecs = {}; }
+    }
+
+    const mappedVariants = (car.variants || []).map(variant => ({
+      ...variant,
+      transmission: carSpecs.transmission || '-',
+      promoPrice:
+        variant.price_string ||
+        formatToIdr(variant.price) ||
+        'Hubungi Sales',
+      originalPrice: null
+    }));
+
+    return {
+      ...car,
+      image: car.image_url || car.image,
+      priceString: car.price_string || car.priceString,
+      variants: mappedVariants
+    };
+  });
+};
+
+const fallbackToMockData = () => {
+  const localCars = Object.values(mockCarsData || {});
+  return {
+    cars: normalizeCarsData(localCars),
+    message: 'Tidak bisa mengambil data dari server, menampilkan data cadangan lokal.'
+  };
+};
+
+const fetchCars = async () => {
+  try {
+    const response = await fetch('http://localhost:5000/api/cars');
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const result = await response.json();
+
+    if (result.success && Array.isArray(result.data) && result.data.length > 0) {
+      return {
+        cars: normalizeCarsData(result.data),
+        message: ''
+      };
+    }
+
+    return fallbackToMockData();
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    return fallbackToMockData();
+  }
+};
 
 const PriceList = () => {
   const categories = [
@@ -15,79 +84,16 @@ const PriceList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCar, setSelectedCar] = useState({ model: '', varian: '' });
 
-  const [carsData, setCarsData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [fetchError, setFetchError] = useState('');
+  const { data, isLoading } = useQuery({
+    queryKey: ['cars'],
+    queryFn: fetchCars
+  });
+
+  const carsData = data?.cars || [];
+  const fetchError = data?.message || '';
 
   useEffect(() => {
     window.scrollTo(0, 0);
-
-    const formatToIdr = (value) => {
-      if (value === null || value === undefined || value === '') return null;
-
-      const numericValue = Number(value);
-      if (Number.isNaN(numericValue)) return null;
-
-      return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        maximumFractionDigits: 0
-      }).format(numericValue);
-    };
-
-    const normalizeCarsData = (cars = []) => {
-      return cars.map(car => {
-        let carSpecs = car.specs || {};
-        if (typeof carSpecs === 'string') {
-          try { carSpecs = JSON.parse(carSpecs); } catch { carSpecs = {}; }
-        }
-
-        const mappedVariants = (car.variants || []).map(variant => ({
-          ...variant,
-          transmission: carSpecs.transmission || '-',
-          promoPrice:
-            variant.price_string ||
-            'Hubungi Sales',
-          originalPrice: null
-        }));
-
-        return {
-          ...car,
-          image: car.image_url || car.image,
-          priceString: car.price_string || car.priceString,
-          variants: mappedVariants
-        };
-      });
-    };
-
-    const fallbackToMockData = () => {
-      const localCars = Object.values(mockCarsData || {});
-      setCarsData(normalizeCarsData(localCars));
-      setFetchError('Tidak bisa mengambil data dari server, menampilkan data cadangan lokal.');
-    };
-    
-    const fetchCars = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/api/cars');
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-        const result = await response.json();
-        
-        if (result.success && Array.isArray(result.data) && result.data.length > 0) {
-          setCarsData(normalizeCarsData(result.data));
-          setFetchError('');
-        } else {
-          fallbackToMockData();
-        }
-      } catch (err) {
-        console.error("Error fetching data:", err);
-        fallbackToMockData();
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCars();
   }, []);
 
   if (isLoading) {

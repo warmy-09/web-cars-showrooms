@@ -2,14 +2,18 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const db = require('./config/db'); 
+const db = require('./config/db'); // Masih dipertahankan untuk test koneksi endpoint di bawah
+
+// Import Routes
+const carRoutes = require('./routes/carRoutes');
 
 const app = express();
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Endpoint Test Database
+// Endpoint Test Database (Health Check)
 app.get('/api/test', async (req, res) => {
   try {
     const [rows] = await db.query('SELECT 1 + 1 AS solution');
@@ -20,30 +24,13 @@ app.get('/api/test', async (req, res) => {
 });
 
 // =================================================================
-// ENDPOINT BARU: Mengambil semua daftar mobil
+// DAFTAR ROUTES UTAMA
 // =================================================================
+app.use('/api/cars', carRoutes);
 
-app.get('/api/cars', async (req, res) => {
-  try {
-    // 1. Ambil data utama dari tabel cars
-    const [cars] = await db.query('SELECT * FROM cars ORDER BY created_at DESC');
-    
-    // 2. Ambil semua data varian dari tabel car_variants
-    const [variants] = await db.query('SELECT * FROM car_variants');
-    
-    // 3. Gabungkan varian ke dalam array mobil yang tepat (mencocokkan car_id)
-    const carsWithVariants = cars.map(car => ({
-      ...car,
-      variants: variants.filter(v => v.car_id === car.id)
-    }));
-
-    // Kirim data yang sudah utuh ke Frontend
-    res.json({ success: true, count: carsWithVariants.length, data: carsWithVariants });
-  } catch (error) {
-    console.error('Error fetching cars:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-});
+// Jika nanti ada tabel users, Anda tinggal tambahkan:
+// const userRoutes = require('./routes/userRoutes');
+// app.use('/api/users', userRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

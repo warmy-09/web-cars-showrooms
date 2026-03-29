@@ -1,6 +1,7 @@
 // backend/config/db.js
 const mysql = require('mysql2/promise');
-require('dotenv').config({ path: '../.env' }); // Mengambil .env dari folder backend (satu tingkat di atas config)
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') }); // Selalu resolve relatif ke file ini
 
 // Membuat koneksi pooling ke MySQL
 const pool = mysql.createPool({
