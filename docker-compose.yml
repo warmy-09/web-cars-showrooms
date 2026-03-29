@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: dealer_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rahasia_super_kuat # Ganti dengan password yang Anda inginkan
+      MYSQL_DATABASE: mitsubishi_dealer
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql # Ini PENTING agar data tidak hilang saat container mati
+
+volumes:
+  mysql_data:
