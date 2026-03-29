@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+// frontend/src/pages/PriceList.jsx
+import React, { useState, useEffect } from 'react';
 import { Filter, ChevronRight, Download } from 'lucide-react';
 import PenawaranModal from '../components/PenawaranModal';
 import { Link } from 'react-router-dom';
+import { carsData as mockCarsData } from '../data/mockData';
 
 const PriceList = () => {
   const categories = [
-    'All', 'Passenger Cars', 'Light Commercial Vehicles', 'Commercial Vehicles', 'Electric Vehicle'
+    'All', 'Passenger Cars', 'Light Commercial', 'Commercial Vehicles', 'Electric Vehicle'
   ];
 
   const [activeCategory, setActiveCategory] = useState('All');
@@ -13,138 +15,88 @@ const PriceList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCar, setSelectedCar] = useState({ model: '', varian: '' });
 
-  const carsData = [
-    {
-      id: 1,
-      category: 'Passenger Cars',
-      name: 'Destinator',
-      tagline: 'SUV Premium 7 Penumpang yang siap mengantar Anda ke setiap tujuan.',
-      image: '/destinator_card.png',
-      variants: [{ name: 'Destinator 2.4L AT', transmission: 'Automatic', promoPrice: 'Rp 422.000.000' }]
-    },
-    {
-      id: 2,
-      category: 'Passenger Cars',
-      name: 'New Destinator',
-      tagline: 'Generasi terbaru dengan fitur keselamatan dan kenyamanan ekstra.',
-      image: '/destinator_card.png',
-      variants: [{ name: 'New Destinator Ultimate AT', transmission: 'Automatic', originalPrice: 'Rp 470.000.000', promoPrice: 'Rp 455.000.000' }]
-    },
-    {
-      id: 3,
-      category: 'Passenger Cars',
-      name: 'New XFORCE',
-      tagline: 'Compact SUV dengan desain futuristik dan mode berkendara canggih.',
-      image: '/xforce_card.png',
-      variants: [
-        { name: 'Exceed CVT', transmission: 'Automatic', promoPrice: 'Rp 382.500.000' },
-        { name: 'Ultimate CVT', transmission: 'Automatic', promoPrice: 'Rp 419.100.000' }
-      ]
-    },
-    {
-      id: 4,
-      category: 'Passenger Cars',
-      name: 'New Pajero Sport',
-      tagline: 'Legendary SUV Flagship. Lebih gagah, lebih mewah, dan lebih bertenaga.',
-      image: '/pajero_card.jpg',
-      variants: [
-        { name: 'Exceed MT 4x2', transmission: 'Manual', promoPrice: 'Rp 567.100.000' },
-        { name: 'Dakar AT 4x2', transmission: 'Automatic', originalPrice: 'Rp 640.700.000', promoPrice: 'Rp 625.700.000' },
-        { name: 'Dakar Ultimate AT 4x4', transmission: 'Automatic', promoPrice: 'Rp 750.600.000' }
-      ]
-    },
-    {
-      id: 5,
-      category: 'Passenger Cars',
-      name: 'New Xpander',
-      tagline: 'MPV Keluarga terfavorit dengan kenyamanan kabin terbaik di kelasnya.',
-      image: '/xpander_card.jpg',
-      variants: [
-        { name: 'GLS MT', transmission: 'Manual', promoPrice: 'Rp 263.200.000' },
-        { name: 'Ultimate CVT', transmission: 'Automatic', promoPrice: 'Rp 324.500.000' }
-      ]
-    },
-    {
-      id: 6,
-      category: 'Passenger Cars',
-      name: 'New Xpander Cross',
-      tagline: 'Perpaduan kenyamanan MPV dan ketangguhan SUV untuk petualangan Anda.',
-      image: '/xpander_cross_card.png',
-      variants: [
-        { name: 'MT', transmission: 'Manual', promoPrice: 'Rp 321.750.000' },
-        { name: 'Premium CVT', transmission: 'Automatic', originalPrice: 'Rp 352.600.000', promoPrice: 'Rp 342.600.000' }
-      ]
-    },
-    {
-      id: 7,
-      category: 'Passenger Cars',
-      name: 'XFORCE',
-      tagline: 'Infinite excitement. SUV dinamis untuk menaklukkan jalanan urban.',
-      image: '/xforce_card.png',
-      variants: [{ name: 'Ultimate CVT', transmission: 'Automatic', promoPrice: 'Rp 412.000.000' }]
-    },
-    {
-      id: 8,
-      category: 'Light Commercial Vehicles',
-      name: 'L300',
-      tagline: 'Jagoan bisnis andalan Indonesia. Mesin baru Euro 4 lebih bertenaga & irit.',
-      image: '/card.png',
-      variants: [
-        { name: 'Pick Up Flat Deck', transmission: 'Manual', promoPrice: 'Rp 232.000.000' },
-        { name: 'Cab Chasiss', transmission: 'Manual', promoPrice: 'Rp 227.000.000' }
-      ]
-    },
-    {
-      id: 9,
-      category: 'Light Commercial Vehicles',
-      name: 'All New Triton',
-      tagline: 'Pick-up double cabin tangguh untuk medan berat dan operasional tambang.',
-      image: '/card.png',
-      variants: [
-        { name: 'HDX MT Double Cab 4WD', transmission: 'Manual', promoPrice: 'Rp 415.000.000' },
-        { name: 'Ultimate AT Double Cab 4WD', transmission: 'Automatic', promoPrice: 'Rp 525.000.000' }
-      ]
-    },
-    {
-      id: 10,
-      category: 'Commercial Vehicles',
-      name: 'Canter',
-      tagline: 'Truk ringan nomor 1 di Indonesia, andalan di segala sektor usaha.',
-      image: '/canter_card.jpg',
-      variants: [
-        { name: 'FE 71 (4 Ban)', transmission: 'Manual', promoPrice: 'Rp 400.000.000' },
-        { name: 'FE 74 HD (6 Ban)', transmission: 'Manual', promoPrice: 'Rp 450.000.000' },
-        { name: 'FE SHDX (6 Ban)', transmission: 'Manual', promoPrice: 'Rp 475.000.000' }
-      ]
-    },
-    {
-      id: 11,
-      category: 'Commercial Vehicles',
-      name: 'Fuso',
-      tagline: 'Truk medium heavy-duty untuk kapasitas muatan maksimal dan logistik jarak jauh.',
-      image: '/card.png',
-      variants: [
-        { name: 'Fighter X FM 65', transmission: 'Manual', promoPrice: 'Rp 950.000.000' },
-        { name: 'Fighter X FN 62', transmission: 'Manual', promoPrice: 'Rp 1.150.000.000' }
-      ]
-    },
-    {
-      id: 12,
-      category: 'Commercial Vehicles',
-      name: 'Tractor Head',
-      tagline: 'Solusi penarik kontainer berat dengan durabilitas mesin yang teruji.',
-      image: '/card.png',
-      variants: [{ name: 'Fighter X FN 62 F HD', transmission: 'Manual', promoPrice: 'Rp 1.250.000.000' }]
-    },
-    {
-      id: 13,
-      category: 'Electric Vehicle',
-      name: 'L100 EV',
-      tagline: 'Kendaraan niaga 100% elektrik pertama dari Mitsubishi untuk bisnis ramah lingkungan.',
-      image: '/card.png',
-      variants: [{ name: 'L100 EV Blind Van', transmission: 'Automatic', promoPrice: 'Rp 320.000.000' }]
-    }
-  ];
+  const [carsData, setCarsData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState('');
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+
+    const formatToIdr = (value) => {
+      if (value === null || value === undefined || value === '') return null;
+
+      const numericValue = Number(value);
+      if (Number.isNaN(numericValue)) return null;
+
+      return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0
+      }).format(numericValue);
+    };
+
+    const normalizeCarsData = (cars = []) => {
+      return cars.map(car => {
+        let carSpecs = car.specs || {};
+        if (typeof carSpecs === 'string') {
+          try { carSpecs = JSON.parse(carSpecs); } catch { carSpecs = {}; }
+        }
+
+        const mappedVariants = (car.variants || []).map(variant => ({
+          ...variant,
+          transmission: carSpecs.transmission || '-',
+          promoPrice:
+            variant.price_string ||
+            'Hubungi Sales',
+          originalPrice: null
+        }));
+
+        return {
+          ...car,
+          image: car.image_url || car.image,
+          priceString: car.price_string || car.priceString,
+          variants: mappedVariants
+        };
+      });
+    };
+
+    const fallbackToMockData = () => {
+      const localCars = Object.values(mockCarsData || {});
+      setCarsData(normalizeCarsData(localCars));
+      setFetchError('Tidak bisa mengambil data dari server, menampilkan data cadangan lokal.');
+    };
+    
+    const fetchCars = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/cars');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const result = await response.json();
+        
+        if (result.success && Array.isArray(result.data) && result.data.length > 0) {
+          setCarsData(normalizeCarsData(result.data));
+          setFetchError('');
+        } else {
+          fallbackToMockData();
+        }
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        fallbackToMockData();
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCars();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center pt-20">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-brand-red"></div>
+      </div>
+    );
+  }
 
   const filteredCars = activeCategory === 'All' ? carsData : carsData.filter(car => car.category === activeCategory);
 
@@ -159,6 +111,11 @@ const PriceList = () => {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-extrabold text-brand-black mb-4 tracking-tight">Daftar Harga OTR Mitsubishi Utama</h1>
           <p className="text-gray-500 max-w-2xl mx-auto">Informasi harga On The Road (OTR) terbaru Jakarta. Harga dapat berubah sewaktu-waktu tanpa pemberitahuan sebelumnya.</p>
+          {fetchError && (
+            <p className="mt-4 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 inline-block">
+              {fetchError}
+            </p>
+          )}
         </div>
 
         <div className="flex flex-wrap justify-center gap-3 mb-12">
@@ -174,6 +131,11 @@ const PriceList = () => {
         </div>
 
         <div className="space-y-12">
+          {filteredCars.length === 0 && (
+            <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-500">
+              Data mobil belum tersedia.
+            </div>
+          )}
           {filteredCars.map((car) => (
             <div key={car.id} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
               <div className="p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-8 border-b border-gray-100 bg-white">
@@ -196,7 +158,7 @@ const PriceList = () => {
                     <div className="flex justify-between items-start mb-2">
                       <span className="text-xs font-bold text-brand-red bg-red-50 px-3 py-1 rounded text-center border border-red-100 tracking-widest uppercase">{car.category}</span>
 
-                      <Link to={`/detail/${car.id}`} className="hidden md:flex items-center text-sm font-semibold text-brand-black hover:text-brand-red transition">
+                      <Link to={`/detail/${car.slug}`} className="hidden md:flex items-center text-sm font-semibold text-brand-black hover:text-brand-red transition">
                         Detail Spesifikasi <ChevronRight className="w-4 h-4 ml-1" />
                       </Link>
                     </div>
@@ -205,7 +167,7 @@ const PriceList = () => {
                   </div>
 
                   <div className="flex flex-wrap gap-3">
-                    <Link to={`/detail/${car.id}`} className="flex items-center text-sm font-bold uppercase tracking-wider text-white bg-brand-red px-5 py-2.5 rounded hover:bg-red-700 transition shadow-sm">
+                    <Link to={`/detail/${car.slug}`} className="flex items-center text-sm font-bold uppercase tracking-wider text-white bg-brand-red px-5 py-2.5 rounded hover:bg-red-700 transition shadow-sm">
                       Lihat Detail
                     </Link>
                     <button className="flex items-center text-sm font-bold uppercase tracking-wider text-gray-700 bg-white border border-gray-300 px-5 py-2.5 rounded hover:bg-gray-50 transition shadow-sm">
@@ -220,7 +182,7 @@ const PriceList = () => {
                   <div className="col-span-5">Varian</div><div className="col-span-2">Transmisi</div><div className="col-span-3">Harga OTR</div><div className="col-span-2 text-right">Action</div>
                 </div>
                 <div className="flex flex-col">
-                  {car.variants.map((variant, index) => (
+                  {(car.variants || []).map((variant, index) => (
                     <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 py-5 border-b border-gray-100 last:border-0 items-center">
                       <div className="col-span-1 md:col-span-5"><p className="font-bold text-brand-black text-lg md:text-base">{variant.name}</p></div>
                       <div className="col-span-1 md:col-span-2 text-gray-600 text-sm font-medium">{variant.transmission}</div>
