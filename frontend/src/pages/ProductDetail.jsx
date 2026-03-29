@@ -2,15 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronRight, Download, CheckCircle, ShieldCheck, Settings, Calculator, Star, ChevronDown, Image as ImageIcon, Share2, Car } from 'lucide-react';
 import PenawaranModal from '../components/PenawaranModal';
-
-import { carsData } from '../data/mockData';
+import { useCarDetail } from '../hooks/useCarDetail';
 
 const ProductDetail = () => {
   const { slug } = useParams();
 
-  const [car, setCar] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // Use React Query custom hook untuk fetch data
+  const { car, isLoading, error } = useCarDetail(slug);
+
   const [imageError, setImageError] = useState(false);
 
   const [activeTab, setActiveTab] = useState('harga');
@@ -22,32 +21,20 @@ const ProductDetail = () => {
   const [asuransi, setAsuransi] = useState('Allrisk');
   const [selectedVariant, setSelectedVariant] = useState(null);
 
+  // Set varian pertama sebagai default ketika car data loaded
   useEffect(() => {
     window.scrollTo(0, 0);
-    setImageError(false);
+  }, []);
 
-    const fetchProductData = async () => {
-      setIsLoading(true);
-      try {
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        const data = carsData[slug];
-
-        if (data) {
-          setCar(data);
-          setSelectedVariant(data.variants[0]);
-        } else {
-          setError("Produk Tidak Ditemukan. Periksa kembali URL Anda.");
-        }
-      } catch (err) {
-        setError("Gagal memuat data dari server.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProductData();
-  }, [slug]);
+  useEffect(() => {
+    if (car?.variants && car.variants.length > 0 && !selectedVariant) {
+      // Use a callback to avoid cascading renders
+      const timer = setTimeout(() => {
+        setSelectedVariant(car.variants[0]);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [car, selectedVariant]);
 
   const tdp = selectedVariant ? (selectedVariant.price * (dpPercent / 100)) + ((selectedVariant.price - (selectedVariant.price * (dpPercent / 100)) + ((selectedVariant.price - (selectedVariant.price * (dpPercent / 100))) * 0.048 * tenor)) / (tenor * 12)) : 0;
   const angsuranPerBulan = selectedVariant ? ((selectedVariant.price - (selectedVariant.price * (dpPercent / 100))) + ((selectedVariant.price - (selectedVariant.price * (dpPercent / 100))) * 0.048 * tenor)) / (tenor * 12) : 0;
