@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import PenawaranModal from '../components/PenawaranModal';
 import { Link } from 'react-router-dom';
 import { carsData as mockCarsData } from '../data/mockData';
+import { apiUrl } from '../config/api';
 
 const formatToIdr = (value) => {
   if (value === null || value === undefined || value === '') return null;
@@ -55,7 +56,7 @@ const fallbackToMockData = () => {
 
 const fetchCars = async () => {
   try {
-    const response = await fetch('http://localhost:5000/api/cars');
+    const response = await fetch(apiUrl('/cars'));
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     const result = await response.json();
