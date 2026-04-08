@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { apiUrl } from '../config/api';
 
 const formatToIdr = (value) => {
   const amount = Number(value);
@@ -49,21 +50,21 @@ const normalizeCar = (car, reviews, faqs) => {
 };
 
 const fetchCarDetail = async (slug) => {
-  const response = await fetch(`http://localhost:5000/api/cars/${slug}`);
+  const response = await fetch(apiUrl(`/cars/${slug}`));
   if (!response.ok) throw new Error(`Failed to fetch car: ${response.status}`);
   const data = await response.json();
   return data.data;
 };
 
 const fetchReviews = async (slug) => {
-  const response = await fetch(`http://localhost:5000/api/cars/${slug}/reviews`);
+  const response = await fetch(apiUrl(`/cars/${slug}/reviews`));
   if (!response.ok) throw new Error(`Failed to fetch reviews: ${response.status}`);
   const data = await response.json();
   return data.data || [];
 };
 
 const fetchFaqs = async (slug) => {
-  const response = await fetch(`http://localhost:5000/api/cars/${slug}/faqs`);
+  const response = await fetch(apiUrl(`/cars/${slug}/faqs`));
   if (!response.ok) throw new Error(`Failed to fetch FAQs: ${response.status}`);
   const data = await response.json();
   return data.data || [];
