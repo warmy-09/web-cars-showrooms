@@ -26,11 +26,39 @@ const normalizeFaq = (faq) => ({
   a: faq.answer || faq.a || '',
 });
 
+const parseHighlights = (value) => {
+  if (Array.isArray(value)) return value.filter(Boolean);
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) return [];
+
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) return parsed.filter(Boolean);
+    } catch (_error) {
+      // Fallback: comma-separated string.
+    }
+
+    return trimmed.split(',').map((item) => item.trim()).filter(Boolean);
+  }
+
+  return [];
+};
+
 const normalizeVariant = (variant) => ({
   ...variant,
   price: Number(variant.price || 0),
   priceStr: variant.price_string || variant.priceStr || formatToIdr(variant.price),
-  highlights: Array.isArray(variant.highlights) ? variant.highlights : [],
+  brochureUrl: variant.brochureUrl || variant.brochure_url || null,
+  highlights: parseHighlights(variant.highlights),
+  specs: variant.specs || {},
+  fullSpecs: variant.fullSpecs || { mesin: [], dimensi: [] },
+  quickSpecs: Array.isArray(variant.quickSpecs) ? variant.quickSpecs : [],
+  highlightDetails: {
+    eksterior: parseHighlights(variant.highlightDetails?.eksterior),
+    interior: parseHighlights(variant.highlightDetails?.interior),
+  },
 });
 
 const normalizeCar = (car, reviews, faqs) => {

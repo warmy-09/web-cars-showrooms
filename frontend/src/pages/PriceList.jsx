@@ -29,7 +29,7 @@ const normalizeCarsData = (cars = []) => {
 
     const mappedVariants = (car.variants || []).map(variant => ({
       ...variant,
-      transmission: carSpecs.transmission || '-',
+      transmission: variant.transmission || carSpecs.transmission || '-',
       promoPrice:
         variant.price_string ||
         formatToIdr(variant.price) ||

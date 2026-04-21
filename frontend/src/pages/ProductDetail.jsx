@@ -38,6 +38,8 @@ const ProductDetail = () => {
 
   const tdp = selectedVariant ? (selectedVariant.price * (dpPercent / 100)) + ((selectedVariant.price - (selectedVariant.price * (dpPercent / 100)) + ((selectedVariant.price - (selectedVariant.price * (dpPercent / 100))) * 0.048 * tenor)) / (tenor * 12)) : 0;
   const angsuranPerBulan = selectedVariant ? ((selectedVariant.price - (selectedVariant.price * (dpPercent / 100))) + ((selectedVariant.price - (selectedVariant.price * (dpPercent / 100))) * 0.048 * tenor)) / (tenor * 12) : 0;
+  const selectedSpecs = selectedVariant?.specs || car?.specs || {};
+  const errorMessage = typeof error === 'string' ? error : error?.message;
 
   const formatRp = (number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number);
 
@@ -47,6 +49,16 @@ const ProductDetail = () => {
     if (calculatorSection) {
       calculatorSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  };
+
+  const handleDownloadBrochure = () => {
+    const brochureUrl = selectedVariant?.brochureUrl || selectedVariant?.brochure_url;
+    if (!brochureUrl) {
+      alert('Brosur untuk varian ini belum tersedia.');
+      return;
+    }
+
+    window.open(brochureUrl, '_blank', 'noopener,noreferrer');
   };
 
     const handleShare = async () => {
@@ -75,7 +87,7 @@ const ProductDetail = () => {
 
   if (error || !car) {
     return <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-gray-500">
-      <h2 className="text-2xl font-bold mb-4 text-brand-black">{error}</h2>
+      <h2 className="text-2xl font-bold mb-4 text-brand-black">{errorMessage || 'Data mobil tidak ditemukan.'}</h2>
       <Link to="/" className="text-brand-red hover:underline">Kembali ke Beranda</Link>
     </div>;
   }
@@ -136,7 +148,7 @@ const ProductDetail = () => {
                 <button onClick={() => setIsModalOpen(true)} className="bg-brand-black text-white px-8 py-3.5 rounded-lg font-bold hover:bg-gray-800 transition shadow-md w-full sm:w-auto">
                   Minta Penawaran
                 </button>
-                <button className="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-8 py-3.5 rounded-lg font-bold hover:bg-gray-50 transition w-full sm:w-auto">
+                <button onClick={handleDownloadBrochure} className="flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-8 py-3.5 rounded-lg font-bold hover:bg-gray-50 transition w-full sm:w-auto">
                   <Download className="w-4 h-4 mr-2" /> Download Brosur
                 </button>
               </div>
@@ -201,14 +213,14 @@ const ProductDetail = () => {
           <div className="bg-white border border-gray-200 rounded-2xl p-8">
             <h3 className="text-2xl font-extrabold mb-6 flex items-center"><Settings className="mr-3 text-brand-red" /> Data Spesifikasi Utama</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-12">
-              <div className="flex justify-between py-3 border-b border-gray-100"><span className="text-gray-500">Tipe Mesin</span><span className="font-bold text-right">{car.specs.engine}</span></div>
-              <div className="flex justify-between py-3 border-b border-gray-100"><span className="text-gray-500">Kapasitas (CC)</span><span className="font-bold text-right">{car.specs.cc}</span></div>
-              <div className="flex justify-between py-3 border-b border-gray-100"><span className="text-gray-500">Tenaga Maksimum</span><span className="font-bold text-right">{car.specs.power}</span></div>
-              <div className="flex justify-between py-3 border-b border-gray-100"><span className="text-gray-500">Torsi Maksimum</span><span className="font-bold text-right">{car.specs.torque}</span></div>
-              <div className="flex justify-between py-3 border-b border-gray-100"><span className="text-gray-500">Transmisi</span><span className="font-bold text-right">{car.specs.transmission}</span></div>
-              <div className="flex justify-between py-3 border-b border-gray-100"><span className="text-gray-500">Dimensi PxLxT</span><span className="font-bold text-right">{car.specs.dimension}</span></div>
+              <div className="flex justify-between py-3 border-b border-gray-100"><span className="text-gray-500">Tipe Mesin</span><span className="font-bold text-right">{selectedSpecs.engine || '-'}</span></div>
+              <div className="flex justify-between py-3 border-b border-gray-100"><span className="text-gray-500">Kapasitas (CC)</span><span className="font-bold text-right">{selectedSpecs.cc || '-'}</span></div>
+              <div className="flex justify-between py-3 border-b border-gray-100"><span className="text-gray-500">Tenaga Maksimum</span><span className="font-bold text-right">{selectedSpecs.power || '-'}</span></div>
+              <div className="flex justify-between py-3 border-b border-gray-100"><span className="text-gray-500">Torsi Maksimum</span><span className="font-bold text-right">{selectedSpecs.torque || '-'}</span></div>
+              <div className="flex justify-between py-3 border-b border-gray-100"><span className="text-gray-500">Transmisi</span><span className="font-bold text-right">{selectedSpecs.transmission || '-'}</span></div>
+              <div className="flex justify-between py-3 border-b border-gray-100"><span className="text-gray-500">Dimensi PxLxT</span><span className="font-bold text-right">{selectedSpecs.dimension || '-'}</span></div>
             </div>
-            <button className="mt-8 flex items-center text-brand-red font-bold hover:underline"><Download className="w-4 h-4 mr-2" /> Download Full Spesifikasi (PDF)</button>
+            <button onClick={handleDownloadBrochure} className="mt-8 flex items-center text-brand-red font-bold hover:underline"><Download className="w-4 h-4 mr-2" /> Download Full Spesifikasi (PDF)</button>
           </div>
         )}
 

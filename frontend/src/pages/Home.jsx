@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star, CheckCircle, ShieldCheck, MapPin, Phone, Clock, Calendar, Quote, Car } from 'lucide-react';
-import { heroSlidesData, carsData } from '../data/mockData';
+import {
+  useHomeHeroSlides,
+  useHomePopularCars,
+  useHomeNews
+} from '../hooks/useHomeData';
 
 const CarCard = ({ car }) => {
   const [imageError, setImageError] = useState(false);
@@ -51,14 +55,9 @@ const CarCard = ({ car }) => {
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const heroSlides = Array.isArray(heroSlidesData) ? heroSlidesData : [];
-  const popularCars = carsData ? Object.values(carsData).slice(0, 6) : [];
-
-  const promos = [
-    { id: 1, title: 'Promo DP Ringan Pajero Sport Mulai 15%', date: '10 Maret 2026', image: '/pajero_card.jpg', type: 'PROMO' },
-    { id: 2, title: 'Bunga 0% Spesial Pembelian Xpander Bulan Ini', date: '05 Maret 2026', image: '/card.png', type: 'PROMO' },
-    { id: 3, title: 'Mitsubishi Utama Raih Penghargaan Dealer Terbaik 2025', date: '28 Februari 2026', image: '/card.png', type: 'BERITA' }
-  ];
+  const { data: heroSlides = [], isLoading: isLoadingHero } = useHomeHeroSlides();
+  const { data: popularCars = [], isLoading: isLoadingCars } = useHomePopularCars();
+  const { data: promos = [], isLoading: isLoadingPromos } = useHomeNews();
 
   const testimonials = [
     { id: 1, name: 'Bapak Sudirman', role: 'Pengusaha Logistik', text: 'Pelayanan sales sangat cepat dan transparan. Pengiriman unit truk Canter on-time sesuai janji, bisnis saya jadi lancar.', rating: 5 },
@@ -68,11 +67,23 @@ const Home = () => {
 
   useEffect(() => {
     if (heroSlides.length === 0) return;
+    setCurrentSlide((prev) => (prev >= heroSlides.length ? 0 : prev));
+
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev === heroSlides.length - 1 ? 0 : prev + 1));
     }, 5000);
     return () => clearInterval(timer);
   }, [heroSlides.length]);
+
+  const isLoading = isLoadingHero || isLoadingCars || isLoadingPromos;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-brand-red"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-50 min-h-screen font-sans">

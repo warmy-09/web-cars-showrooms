@@ -34,6 +34,9 @@ app.get('/api/health', (req, res) => {
 app.use('/api/cars', carRoutes);
 app.use('/api', contentRoutes);
 
+const imagesPath = path.join(__dirname, 'images');
+app.use('/images', express.static(imagesPath));
+
 const distPath = path.join(__dirname, 'dist');
 const indexPath = path.join(distPath, 'index.html');
 const hasFrontendBuild = fs.existsSync(indexPath);
@@ -41,8 +44,8 @@ const hasFrontendBuild = fs.existsSync(indexPath);
 if (hasFrontendBuild) {
   app.use(express.static(distPath));
 
-  // SPA fallback: semua route non-API diarahkan ke React index.html
-  app.get(/^\/(?!api\/).*/, (req, res) => {
+  // SPA fallback: semua route non-API/non-images diarahkan ke React index.html
+  app.get(/^\/(?!api\/|images\/).*/, (req, res) => {
     return res.sendFile(indexPath);
   });
 } else {
