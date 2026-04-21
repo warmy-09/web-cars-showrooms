@@ -45,7 +45,7 @@ if (hasFrontendBuild) {
   app.use(express.static(distPath));
 
   // SPA fallback: semua route non-API/non-images diarahkan ke React index.html
-  app.get(/^\/(?!api\/|images\/).*/, (req, res) => {
+  app.get(/^\/(?!api\/|images\/|assets\/).*/, (req, res) => {
     return res.sendFile(indexPath);
   });
 } else {
