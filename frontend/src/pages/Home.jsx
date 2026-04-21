@@ -55,9 +55,9 @@ const CarCard = ({ car }) => {
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const { data: heroSlides = [], isLoading: isLoadingHero } = useHomeHeroSlides();
-  const { data: popularCars = [], isLoading: isLoadingCars } = useHomePopularCars();
-  const { data: promos = [], isLoading: isLoadingPromos } = useHomeNews();
+  const { data: heroSlides = [], isLoading: isLoadingHero, error: heroError } = useHomeHeroSlides();
+  const { data: popularCars = [], isLoading: isLoadingCars, error: carsError } = useHomePopularCars();
+  const { data: promos = [], isLoading: isLoadingPromos, error: promosError } = useHomeNews();
 
   const testimonials = [
     { id: 1, name: 'Bapak Sudirman', role: 'Pengusaha Logistik', text: 'Pelayanan sales sangat cepat dan transparan. Pengiriman unit truk Canter on-time sesuai janji, bisnis saya jadi lancar.', rating: 5 },
@@ -76,8 +76,9 @@ const Home = () => {
   }, [heroSlides.length]);
 
   const isLoading = isLoadingHero || isLoadingCars || isLoadingPromos;
+  const hasErrors = heroError || carsError || promosError;
 
-  if (isLoading) {
+  if (isLoading && !heroSlides.length && !popularCars.length && !promos.length) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-brand-red"></div>
