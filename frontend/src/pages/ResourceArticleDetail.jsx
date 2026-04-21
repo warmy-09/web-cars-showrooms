@@ -1,45 +1,43 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
-
-import { carsData, resourceCategoriesData, getResourceByCar } from '../data/mockData';
+import {
+  useResourcesCars,
+  useResourceCategories,
+  useResourceByCar,
+  useResourceArticleDetail
+} from '../hooks/useResourcesData';
 
 const ResourceArticleDetail = () => {
   const { slug, articleSlug } = useParams();
-  const [car, setCar] = useState(null);
-  const [article, setArticle] = useState(null);
-  const [relatedArticles, setRelatedArticles] = useState([]);
-  const [categoryName, setCategoryName] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+
+  const { data: cars = [], isLoading: isLoadingCars } = useResourcesCars();
+  const { data: resourceCategoriesData = [], isLoading: isLoadingCategories } = useResourceCategories();
+  const car = useMemo(
+    () => (Array.isArray(cars) ? cars.find((item) => item.slug === slug) || null : null),
+    [cars, slug]
+  );
+  const { data: resources, isLoading: isLoadingResources } = useResourceByCar(slug, car?.name, car?.year);
+  const { data: article, isLoading: isLoadingArticle } = useResourceArticleDetail(slug, articleSlug);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    setIsLoading(true);
-
-    if (carsData && carsData[slug]) {
-      const foundCar = carsData[slug];
-      setCar(foundCar);
-
-      const resources = getResourceByCar(slug, foundCar.name, foundCar.year);
-
-      const allArticles = [...resources.highlights, ...resources.articles];
-      const foundArticle = allArticles.find(a => a.slug === articleSlug);
-
-      if (foundArticle) {
-        setArticle(foundArticle);
-
-        const cat = resourceCategoriesData.find(c => c.id === foundArticle.categoryId);
-        setCategoryName(cat ? cat.title : 'Panduan');
-
-        const related = resources.articles
-          .filter(a => a.categoryId === foundArticle.categoryId && a.slug !== articleSlug)
-          .slice(0, 4);
-        setRelatedArticles(related);
-      }
-    }
-
-    setTimeout(() => setIsLoading(false), 400);
   }, [slug, articleSlug]);
+
+  const categoryName = useMemo(() => {
+    if (!article || !Array.isArray(resourceCategoriesData)) return 'Panduan';
+    const category = resourceCategoriesData.find((item) => item.id === article.categoryId);
+    return category ? category.title : 'Panduan';
+  }, [article, resourceCategoriesData]);
+
+  const relatedArticles = useMemo(() => {
+    if (!article || !resources) return [];
+    return (resources.articles || [])
+      .filter((item) => item.categoryId === article.categoryId && item.slug !== articleSlug)
+      .slice(0, 4);
+  }, [article, resources, articleSlug]);
+
+  const isLoading = isLoadingCars || isLoadingCategories || isLoadingResources || isLoadingArticle;
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-white"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-brand-red"></div></div>;
   if (!car || !article) return <div className="min-h-screen flex items-center justify-center text-gray-500 font-bold text-xl">Artikel Panduan Tidak Ditemukan.</div>;

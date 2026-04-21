@@ -9,7 +9,24 @@ const getAllCars = async () => {
 
 // Fungsi untuk mengambil semua data varian
 const getAllCarVariants = async () => {
-  const [rows] = await db.query('SELECT * FROM car_variants');
+  const query = `
+    SELECT
+      v.*,
+      COALESCE(
+        MAX(
+          CASE
+            WHEN LOWER(s.spec_label) IN ('transmisi', 'transmission') THEN s.spec_value
+            ELSE NULL
+          END
+        ),
+        '-'
+      ) AS transmission
+    FROM car_variants v
+    LEFT JOIN car_specs s ON s.variant_id = v.id
+    GROUP BY v.id
+    ORDER BY v.price ASC, v.id ASC
+  `;
+  const [rows] = await db.query(query);
   return rows;
 };
 
@@ -21,7 +38,68 @@ const getCarBySlug = async (slug) => {
 
 // Fungsi untuk mengambil varian mobil berdasarkan car_id
 const getVariantsByCarId = async (carId) => {
-  const [rows] = await db.query('SELECT * FROM car_variants WHERE car_id = ?', [carId]);
+  const query = `
+    SELECT
+      v.*,
+      COALESCE(
+        MAX(
+          CASE
+            WHEN LOWER(s.spec_label) IN ('transmisi', 'transmission') THEN s.spec_value
+            ELSE NULL
+          END
+        ),
+        '-'
+      ) AS transmission
+    FROM car_variants v
+    LEFT JOIN car_specs s ON s.variant_id = v.id
+    WHERE v.car_id = ?
+    GROUP BY v.id
+    ORDER BY v.price ASC, v.id ASC
+  `;
+  const [rows] = await db.query(query, [carId]);
+  return rows;
+};
+
+// Mengambil spesifikasi relasional (per varian) berdasarkan car_id
+const getSpecsByCarId = async (carId) => {
+  const query = `
+    SELECT s.spec_category, s.spec_label, s.spec_value
+    FROM car_specs s
+    INNER JOIN car_variants v ON v.id = s.variant_id
+    WHERE v.car_id = ?
+    ORDER BY s.id ASC
+  `;
+
+  const [rows] = await db.query(query, [carId]);
+  return rows;
+};
+
+// Mengambil galeri mobil berdasarkan car_id
+const getGalleryByCarId = async (carId) => {
+  const query = `
+    SELECT image_url
+    FROM car_galleries
+    WHERE car_id = ?
+    ORDER BY display_order ASC, id ASC
+  `;
+
+  const [rows] = await db.query(query, [carId]);
+  return rows;
+};
+
+// Mengambil warna mobil berdasarkan car_id
+const getColorsByCarId = async (carId) => {
+  const query = `
+    SELECT
+      color_name AS name,
+      hex_code AS hex,
+      image_url
+    FROM car_colors
+    WHERE car_id = ?
+    ORDER BY id ASC
+  `;
+
+  const [rows] = await db.query(query, [carId]);
   return rows;
 };
 
@@ -53,6 +131,9 @@ module.exports = {
   getAllCarVariants,
   getCarBySlug,
   getVariantsByCarId,
+  getSpecsByCarId,
+  getGalleryByCarId,
+  getColorsByCarId,
   getReviewsBySlug,
   getFaqsBySlug
 };

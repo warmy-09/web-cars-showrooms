@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, User, ArrowRight } from 'lucide-react';
-
-import { newsPromoData } from '../data/mockData';
+import { useNewsList } from '../hooks/useNewsData';
 
 const News = () => {
   const [activeFilter, setActiveFilter] = useState('Semua');
+  const { data: newsItems = [], isLoading } = useNewsList();
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  const filteredData = newsPromoData.filter(item => {
+  const filteredData = newsItems.filter(item => {
     if (activeFilter === 'Semua') return true;
     return item.type === activeFilter;
   });
@@ -21,6 +21,14 @@ const News = () => {
   const gridArticles = activeFilter === 'Semua'
     ? filteredData.filter(item => !item.isFeatured)
     : filteredData;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-brand-red"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-50 min-h-screen font-sans pb-20">

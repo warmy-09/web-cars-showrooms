@@ -2,10 +2,16 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config();
+
+// Priority: .env.local (local dev) → .env (production)
+const envLocalPath = path.resolve(__dirname, '.env.local');
+const envPath = fs.existsSync(envLocalPath) ? envLocalPath : path.resolve(__dirname, '.env');
+require('dotenv').config({ path: envPath });
+console.log(`[env] Loading from: ${envPath}`);
 
 const db = require('./config/db');
 const carRoutes = require('./routes/carRoutes');
+const contentRoutes = require('./routes/contentRoutes');
 
 const app = express();
 
@@ -26,6 +32,7 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/cars', carRoutes);
+app.use('/api', contentRoutes);
 
 const distPath = path.join(__dirname, 'dist');
 const indexPath = path.join(distPath, 'index.html');
