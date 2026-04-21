@@ -15,7 +15,9 @@ const getAllCarVariants = async () => {
       COALESCE(
         MAX(
           CASE
-            WHEN LOWER(s.spec_label) IN ('transmisi', 'transmission') THEN s.spec_value
+            WHEN LOWER(CONCAT(IFNULL(s.spec_category, ''), ' ', IFNULL(s.spec_label, ''))) LIKE '%transmis%'
+              OR LOWER(CONCAT(IFNULL(s.spec_category, ''), ' ', IFNULL(s.spec_label, ''))) LIKE '%transmission%'
+            THEN s.spec_value
             ELSE NULL
           END
         ),
@@ -44,7 +46,9 @@ const getVariantsByCarId = async (carId) => {
       COALESCE(
         MAX(
           CASE
-            WHEN LOWER(s.spec_label) IN ('transmisi', 'transmission') THEN s.spec_value
+            WHEN LOWER(CONCAT(IFNULL(s.spec_category, ''), ' ', IFNULL(s.spec_label, ''))) LIKE '%transmis%'
+              OR LOWER(CONCAT(IFNULL(s.spec_category, ''), ' ', IFNULL(s.spec_label, ''))) LIKE '%transmission%'
+            THEN s.spec_value
             ELSE NULL
           END
         ),
@@ -63,7 +67,7 @@ const getVariantsByCarId = async (carId) => {
 // Mengambil spesifikasi relasional (per varian) berdasarkan car_id
 const getSpecsByCarId = async (carId) => {
   const query = `
-    SELECT s.spec_category, s.spec_label, s.spec_value
+    SELECT s.variant_id, s.spec_category, s.spec_label, s.spec_value
     FROM car_specs s
     INNER JOIN car_variants v ON v.id = s.variant_id
     WHERE v.car_id = ?
@@ -91,12 +95,31 @@ const getGalleryByCarId = async (carId) => {
 const getColorsByCarId = async (carId) => {
   const query = `
     SELECT
+      id,
       color_name AS name,
       hex_code AS hex,
       image_url
     FROM car_colors
     WHERE car_id = ?
     ORDER BY id ASC
+  `;
+
+  const [rows] = await db.query(query, [carId]);
+  return rows;
+};
+
+// Mengambil fitur varian berdasarkan car_id (melalui relasi car_variants)
+const getVariantFeaturesByCarId = async (carId) => {
+  const query = `
+    SELECT
+      f.variant_id,
+      f.feature_group,
+      f.feature_text,
+      f.display_order
+    FROM car_variant_features f
+    INNER JOIN car_variants v ON v.id = f.variant_id
+    WHERE v.car_id = ?
+    ORDER BY f.variant_id ASC, f.display_order ASC, f.id ASC
   `;
 
   const [rows] = await db.query(query, [carId]);
@@ -134,6 +157,7 @@ module.exports = {
   getSpecsByCarId,
   getGalleryByCarId,
   getColorsByCarId,
+  getVariantFeaturesByCarId,
   getReviewsBySlug,
   getFaqsBySlug
 };

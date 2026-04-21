@@ -1,41 +1,68 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronLeft, CheckCircle, ShieldCheck, Calculator, Star, Share2, Car } from 'lucide-react';
-
-import { carsData } from '../data/mockData';
+import { useCarDetail } from '../hooks/useCarDetail';
 
 const VariantDetail = () => {
   const { slug, variantSlug } = useParams();
+  const { car, isLoading, error } = useCarDetail(slug);
 
-  const [car, setCar] = useState(null);
-  const [variant, setVariant] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
 
-  const [selectedColor, setSelectedColor] = useState('Quartz White Pearl');
+  const [selectedColorId, setSelectedColorId] = useState(null);
   const [dpPercent, setDpPercent] = useState(20);
   const [tenor, setTenor] = useState(5);
   const [asuransi, setAsuransi] = useState('Allrisk');
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    setIsLoading(true);
-    setImageError(false);
+  const variant = useMemo(() => {
+    if (!car || !Array.isArray(car.variants)) return null;
+    return car.variants.find((item) => item.slug === variantSlug) || null;
+  }, [car, variantSlug]);
 
-    const carData = carsData[slug];
-    if (carData) {
-      const variantData = carData.variants.find(v => v.slug === variantSlug);
-      if (variantData) {
-        setCar(carData);
-        setVariant(variantData);
+  const normalizedVariant = useMemo(() => {
+    if (!variant) return null;
+
+    return {
+      ...variant,
+      priceStr: variant.priceStr || variant.price_string || 'Hubungi Sales',
+      highlightDetails: {
+        eksterior: variant.highlightDetails?.eksterior || variant.highlights || [],
+        interior: variant.highlightDetails?.interior || []
       }
+    };
+  }, [variant]);
+
+  const availableColors = useMemo(() => {
+    if (!car || !Array.isArray(car.colors) || car.colors.length === 0) {
+      return [{ id: 'fallback', name: 'Standard', hex: '#cbd5e1', imageUrl: '' }];
     }
 
-    setTimeout(() => { setIsLoading(false); }, 500);
+    return car.colors.map((item) => ({
+      id: item.id || `${item.name || item.color_name || 'color'}-${item.hex || item.hex_code || 'hex'}`,
+      name: String(item.name || item.color_name || 'Standard').trim(),
+      hex: String(item.hex || item.hex_code || '#cbd5e1').trim(),
+      imageUrl: String(item.image_url || '').trim()
+    }));
+  }, [car]);
+
+  const selectedColorData = useMemo(() => {
+    return availableColors.find((item) => item.id === selectedColorId) || availableColors[0] || null;
+  }, [availableColors, selectedColorId]);
+
+  const selectedColorName = selectedColorData?.name || 'Standard';
+
+  const displayImage = selectedColorData?.imageUrl || car?.image || '';
+
+  const fullSpecsMesin = Array.isArray(car?.fullSpecs?.mesin) ? car.fullSpecs.mesin : [];
+  const fullSpecsDimensi = Array.isArray(car?.fullSpecs?.dimensi) ? car.fullSpecs.dimensi : [];
+  const quickSpecs = Array.isArray(car?.quickSpecs) ? car.quickSpecs : [];
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
   }, [slug, variantSlug]);
 
   const bungaPerTahun = 0.048;
-  const variantPrice = variant ? variant.price : 0;
+  const variantPrice = normalizedVariant ? Number(normalizedVariant.price || 0) : 0;
   const dpNominal = variantPrice * (dpPercent / 100);
   const pokokHutang = variantPrice - dpNominal;
   const totalBunga = pokokHutang * bungaPerTahun * tenor;
@@ -66,7 +93,7 @@ const VariantDetail = () => {
   };
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-brand-red"></div></div>;
-  if (!car || !variant) return <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-gray-500"><h2 className="text-2xl font-bold mb-4 text-brand-black">Varian Kendaraan Tidak Ditemukan.</h2><Link to="/" className="text-brand-red hover:underline">Kembali ke Beranda</Link></div>;
+  if (error || !car || !normalizedVariant) return <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-gray-500"><h2 className="text-2xl font-bold mb-4 text-brand-black">Varian Kendaraan Tidak Ditemukan.</h2><Link to="/" className="text-brand-red hover:underline">Kembali ke Beranda</Link></div>;
 
   return (
     <div className="bg-gray-50 min-h-screen font-sans text-brand-black pb-20">
@@ -95,9 +122,10 @@ const VariantDetail = () => {
             </div>
           ) : (
             <img
-              src={car.image}
+              src={displayImage}
               alt={variant.name}
               className="w-full max-w-lg object-contain drop-shadow-2xl relative z-0"
+              onLoad={() => setImageError(false)}
               onError={() => setImageError(true)}
             />
           )}
@@ -107,25 +135,30 @@ const VariantDetail = () => {
               <div>
                 <h4 className="font-extrabold text-lg mb-4">Pilihan Warna</h4>
                 <div className="flex space-x-3">
-                  {car.colors.map((color, idx) => (
+                  {availableColors.map((color, idx) => (
                     <button
-                      key={idx}
-                      onClick={() => setSelectedColor(color.name)}
-                      className={`w-10 h-10 rounded-full border-2 transition-all duration-300 ${selectedColor === color.name ? 'border-brand-black scale-110 shadow-md ring-2 ring-gray-200 ring-offset-2' : 'border-gray-300'}`}
+                      key={color.id || idx}
+                      onClick={() => {
+                        setSelectedColorId(color.id);
+                        setImageError(false);
+                      }}
+                      className={`w-10 h-10 rounded-full border-2 transition-all duration-300 cursor-pointer ${((selectedColorId === null && idx === 0) || selectedColorId === color.id) ? 'border-brand-black scale-110 shadow-md ring-2 ring-gray-200 ring-offset-2' : 'border-gray-300'}`}
                       style={{ backgroundColor: color.hex }}
                       title={color.name}
+                      aria-label={`Pilih warna ${color.name}`}
+                      aria-pressed={(selectedColorId === null && idx === 0) || selectedColorId === color.id}
                     ></button>
                   ))}
                 </div>
                 <p className="text-xs text-green-600 mt-3 flex items-center font-medium"><CheckCircle className="w-3 h-3 mr-1" /> Tampilan sesuai warna asli</p>
               </div>
               <div className="text-right">
-                <span className="bg-gray-100 text-brand-black font-bold px-4 py-2 rounded-lg text-sm">{selectedColor}</span>
+                <span className="bg-gray-100 text-brand-black font-bold px-4 py-2 rounded-lg text-sm">{selectedColorName}</span>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              {car.quickSpecs.map((qs, i) => (
+              {quickSpecs.map((qs, i) => (
                 <div key={i} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-center">
                   <span className="text-xs text-gray-400 font-semibold mb-1">{qs.label}</span>
                   <span className="font-extrabold text-brand-black text-lg">{qs.value}</span>
@@ -140,7 +173,7 @@ const VariantDetail = () => {
               <div className="mb-8">
                 <div className="flex justify-between items-start mb-2">
                   <h1 className="text-3xl font-extrabold text-brand-black leading-tight">
-                    {car.name} <br/> <span className="text-brand-red">{variant.name}</span>
+                    {car.name} <br/> <span className="text-brand-red">{normalizedVariant.name}</span>
                   </h1>
                   <button onClick={handleShare} className="p-2 bg-gray-50 border border-gray-200 rounded-full text-gray-500 hover:text-brand-black transition" title="Share Varian Ini">
                     <Share2 className="w-5 h-5"/>
@@ -156,7 +189,7 @@ const VariantDetail = () => {
                 </div>
 
                 <div className="bg-red-50 text-brand-red text-xs font-bold px-2 py-1 rounded inline-block mb-2">PROMO DP RINGAN</div>
-                <h2 className="text-5xl font-extrabold text-brand-black mb-2">{variant.priceStr}</h2>
+                <h2 className="text-5xl font-extrabold text-brand-black mb-2">{normalizedVariant.priceStr}</h2>
                 <p className="text-sm text-gray-400">Harga On The Road (OTR) Jakarta</p>
               </div>
 
@@ -164,13 +197,13 @@ const VariantDetail = () => {
                 <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
                   <h4 className="font-extrabold text-brand-black mb-4 flex items-center">🚘 Eksterior</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {variant.highlightDetails.eksterior.map((hl, i) => (<div key={i} className="flex items-start text-sm text-gray-600"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" /> {hl}</div>))}
+                    {normalizedVariant.highlightDetails.eksterior.map((hl, i) => (<div key={i} className="flex items-start text-sm text-gray-600"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" /> {hl}</div>))}
                   </div>
                 </div>
                 <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
                   <h4 className="font-extrabold text-brand-black mb-4 flex items-center">🛋️ Interior</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {variant.highlightDetails.interior.map((hl, i) => (<div key={i} className="flex items-start text-sm text-gray-600"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" /> {hl}</div>))}
+                    {normalizedVariant.highlightDetails.interior.map((hl, i) => (<div key={i} className="flex items-start text-sm text-gray-600"><CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" /> {hl}</div>))}
                   </div>
                 </div>
               </div>
@@ -180,7 +213,7 @@ const VariantDetail = () => {
                 <div className="mb-8">
                   <h4 className="font-bold text-gray-500 mb-4 bg-gray-100 px-3 py-1 rounded inline-block text-sm">Mesin & Performa</h4>
                   <div className="space-y-3">
-                    {car.fullSpecs.mesin.map((spec, i) => (
+                    {fullSpecsMesin.map((spec, i) => (
                       <div key={i} className="flex justify-between text-sm border-b border-gray-50 pb-2">
                         <span className="text-gray-500">{spec.label}</span><span className="font-bold text-right">{spec.value}</span>
                       </div>
@@ -191,7 +224,7 @@ const VariantDetail = () => {
                 <div>
                   <h4 className="font-bold text-gray-500 mb-4 bg-gray-100 px-3 py-1 rounded inline-block text-sm">Dimensi</h4>
                   <div className="space-y-3">
-                    {car.fullSpecs.dimensi.map((spec, i) => (
+                    {fullSpecsDimensi.map((spec, i) => (
                       <div key={i} className="flex justify-between text-sm border-b border-gray-50 pb-2">
                         <span className="text-gray-500">{spec.label}</span><span className="font-bold text-right">{spec.value}</span>
                       </div>
@@ -233,7 +266,7 @@ const VariantDetail = () => {
             <div className="w-12 h-12 bg-gray-100 text-brand-black rounded-xl flex items-center justify-center mr-4"><Calculator className="w-6 h-6" /></div>
             <div>
               <h2 className="text-2xl font-extrabold text-brand-black">Smart Credit Simulator</h2>
-              <p className="text-gray-500 text-sm">Hitung estimasi cicilan {car.name} {variant.name}.</p>
+              <p className="text-gray-500 text-sm">Hitung estimasi cicilan {car.name} {normalizedVariant.name}.</p>
             </div>
           </div>
 
@@ -266,7 +299,7 @@ const VariantDetail = () => {
               <div className="mb-8"><p className="text-sm text-gray-500 mb-1">Angsuran per Bulan</p><h3 className="text-3xl font-extrabold text-brand-black">{formatRp(angsuranPerBulan)}</h3><p className="text-xs text-gray-400 mt-1">Selama {tenor * 12} bulan</p></div>
 
               <div className="space-y-2 mb-8 border-t border-gray-200 pt-6">
-                <div className="flex justify-between text-xs"><span className="text-gray-500">Harga OTR</span><span className="font-bold">{variant.priceStr}</span></div>
+                <div className="flex justify-between text-xs"><span className="text-gray-500">Harga OTR</span><span className="font-bold">{normalizedVariant.priceStr}</span></div>
                 <div className="flex justify-between text-xs"><span className="text-gray-500">DP Murni ({dpPercent}%)</span><span className="font-bold">{formatRp(dpNominal)}</span></div>
                 <div className="flex justify-between text-xs"><span className="text-gray-500">Pokok Hutang</span><span className="font-bold">{formatRp(pokokHutang)}</span></div>
               </div>

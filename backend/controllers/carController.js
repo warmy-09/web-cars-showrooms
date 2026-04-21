@@ -76,6 +76,77 @@ const buildQuickSpecs = (specs) => {
   return quickSpecs;
 };
 
+const buildSpecRowsByVariant = (specRows = []) => {
+  const grouped = new Map();
+
+  for (const row of specRows) {
+    const variantId = row.variant_id;
+    if (!grouped.has(variantId)) {
+      grouped.set(variantId, []);
+    }
+    grouped.get(variantId).push(row);
+  }
+
+  return grouped;
+};
+
+const normalizeHighlights = (rawHighlights) => {
+  if (Array.isArray(rawHighlights)) {
+    return rawHighlights.filter(Boolean);
+  }
+
+  if (typeof rawHighlights === 'string') {
+    const trimmed = rawHighlights.trim();
+    if (!trimmed) return [];
+
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return parsed.filter(Boolean);
+      }
+    } catch (_error) {
+      // Fallback: anggap string dipisah koma jika bukan JSON array.
+    }
+
+    return trimmed.split(',').map((item) => item.trim()).filter(Boolean);
+  }
+
+  return [];
+};
+
+const buildVariantFeatureMap = (featureRows = []) => {
+  const map = new Map();
+
+  for (const row of featureRows) {
+    const variantId = row.variant_id;
+    if (!map.has(variantId)) {
+      map.set(variantId, {
+        highlights: [],
+        highlightDetails: {
+          eksterior: [],
+          interior: []
+        }
+      });
+    }
+
+    const current = map.get(variantId);
+    const text = String(row.feature_text || '').trim();
+    if (!text) continue;
+
+    if (!current.highlights.includes(text)) {
+      current.highlights.push(text);
+    }
+
+    if (row.feature_group === 'eksterior') {
+      current.highlightDetails.eksterior.push(text);
+    } else if (row.feature_group === 'interior') {
+      current.highlightDetails.interior.push(text);
+    }
+  }
+
+  return map;
+};
+
 const getCars = async (req, res) => {
   try {
     const cars = await carModel.getAllCars();
@@ -112,14 +183,39 @@ const getCarBySlug = async (req, res) => {
     const specRows = await carModel.getSpecsByCarId(car.id);
     const galleryRows = await carModel.getGalleryByCarId(car.id);
     const colorRows = await carModel.getColorsByCarId(car.id);
+    const featureRows = await carModel.getVariantFeaturesByCarId(car.id);
 
     const specs = buildSpecs(specRows);
     const fullSpecs = buildFullSpecs(specRows);
+    const variantFeatureMap = buildVariantFeatureMap(featureRows);
+    const specRowsByVariant = buildSpecRowsByVariant(specRows);
 
-    car.variants = variants;
-    car.specs = specs;
-    car.fullSpecs = fullSpecs;
-    car.quickSpecs = buildQuickSpecs(specs);
+    const variantsWithFeatures = variants.map((variant) => {
+      const mapped = variantFeatureMap.get(variant.id);
+      const fallbackHighlights = normalizeHighlights(variant.highlights);
+      const variantSpecRows = specRowsByVariant.get(variant.id) || [];
+      const variantSpecs = buildSpecs(variantSpecRows);
+
+      return {
+        ...variant,
+        brochureUrl: variant.brochure_url || null,
+        highlights: mapped?.highlights?.length ? mapped.highlights : fallbackHighlights,
+        specs: variantSpecs,
+        fullSpecs: buildFullSpecs(variantSpecRows),
+        quickSpecs: buildQuickSpecs(variantSpecs),
+        highlightDetails: {
+          eksterior: mapped?.highlightDetails?.eksterior || [],
+          interior: mapped?.highlightDetails?.interior || []
+        }
+      };
+    });
+
+    const defaultVariant = variantsWithFeatures[0] || null;
+
+    car.variants = variantsWithFeatures;
+    car.specs = defaultVariant?.specs || specs;
+    car.fullSpecs = defaultVariant?.fullSpecs || fullSpecs;
+    car.quickSpecs = defaultVariant?.quickSpecs || buildQuickSpecs(specs);
     car.colors = colorRows;
     car.gallery = galleryRows.map(item => item.image_url).filter(Boolean);
 
