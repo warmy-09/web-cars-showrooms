@@ -1,6 +1,15 @@
 // backend/config/db.js
 const mysql = require('mysql2/promise');
-// Env sudah di-load oleh server.js, tidak perlu load ulang di sini
+const path = require('path');
+const fs = require('fs');
+
+// Priority: .env.local (development) → .env (production)
+const envPath = fs.existsSync(path.resolve(__dirname, '../.env.local'))
+  ? path.resolve(__dirname, '../.env.local')
+  : path.resolve(__dirname, '../.env');
+
+require('dotenv').config({ path: envPath });
+console.log(`Loading environment from: ${envPath}`);
 
 // Membuat koneksi pooling ke MySQL
 const pool = mysql.createPool({
