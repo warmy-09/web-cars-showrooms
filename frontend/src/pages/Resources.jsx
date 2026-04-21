@@ -4,19 +4,36 @@ import {
   Search, Car, Settings, CreditCard, Shield, FileText,
   Phone, MessageCircle, Mail, ChevronRight, BookOpen, Wrench, HelpCircle
 } from 'lucide-react';
-
-import { carsData, newsPromoData, faqTopicsData, importantGuidesData } from '../data/mockData';
+import { useNewsList } from '../hooks/useNewsData';
+import {
+  useResourcesCars,
+  useFaqTopics,
+  useImportantGuides
+} from '../hooks/useResourcesData';
 
 const Resources = () => {
+  const { data: carsList = [], isLoading: isLoadingCars } = useResourcesCars();
+  const { data: faqTopicsData = [], isLoading: isLoadingTopics } = useFaqTopics();
+  const { data: importantGuidesData = [], isLoading: isLoadingGuides } = useImportantGuides();
+  const { data: newsItems = [] } = useNewsList();
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  const carsList = carsData ? Object.values(carsData) : [];
+  const recentArticles = newsItems
+    .filter((item) => item.type === 'BERITA')
+    .slice(0, 3);
 
-  const recentArticles = newsPromoData
-    ? newsPromoData.filter(item => item.type === 'BERITA').slice(0, 3)
-    : [];
+  const isLoading = isLoadingCars || isLoadingTopics || isLoadingGuides;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-brand-red"></div>
+      </div>
+    );
+  }
 
   const renderIcon = (iconName) => {
     const IconMap = {

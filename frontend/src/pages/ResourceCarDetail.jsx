@@ -1,30 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ChevronLeft, ChevronRight, BookOpen, Settings, Wrench,
   CreditCard, Compass, ShieldCheck, AlertTriangle, Star
 } from 'lucide-react';
-
-import { carsData, resourceCategoriesData, getResourceByCar } from '../data/mockData';
+import {
+  useResourcesCars,
+  useResourceCategories,
+  useResourceByCar
+} from '../hooks/useResourcesData';
 
 const ResourceCarDetail = () => {
   const { slug } = useParams();
-  const [car, setCar] = useState(null);
-  const [resources, setResources] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+
+  const { data: cars = [], isLoading: isLoadingCars } = useResourcesCars();
+  const { data: resourceCategoriesData = [], isLoading: isLoadingCategories } = useResourceCategories();
+  const car = useMemo(
+    () => (Array.isArray(cars) ? cars.find((item) => item.slug === slug) || null : null),
+    [cars, slug]
+  );
+  const { data: resources, isLoading: isLoadingResources } = useResourceByCar(slug, car?.name, car?.year);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    setIsLoading(true);
-
-    if (carsData && carsData[slug]) {
-      const foundCar = carsData[slug];
-      setCar(foundCar);
-      setResources(getResourceByCar(slug, foundCar.name, foundCar.year));
-    }
-
-    setTimeout(() => setIsLoading(false), 400);
   }, [slug]);
+
+  const isLoading = isLoadingCars || isLoadingCategories || isLoadingResources;
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-brand-red"></div></div>;
   if (!car || !resources) return <div className="min-h-screen flex items-center justify-center text-gray-500 font-bold text-xl">Data Panduan Mobil Tidak Ditemukan.</div>;
@@ -145,7 +146,7 @@ const ResourceCarDetail = () => {
                   </div>
                 </div>
                 <Link to="#" className="inline-flex items-center text-sm font-bold text-brand-red bg-red-50 hover:bg-red-100 px-5 py-2.5 rounded-lg transition-colors whitespace-nowrap">
-                  Lihat Semua ({Math.floor(Math.random() * 10) + 8}) <ChevronRight className="w-4 h-4 ml-1" />
+                  Lihat Semua ({categoryArticles.length}) <ChevronRight className="w-4 h-4 ml-1" />
                 </Link>
               </div>
 
